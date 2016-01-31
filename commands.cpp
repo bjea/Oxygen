@@ -90,6 +90,18 @@ void fn_lsr (inode_state& state, const wordvec& words){
 void fn_make (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+
+   if(words.size() > 1)
+   {
+      wordvec newdata;
+      for (auto it = words.begin()+2; it != words.end(); ++it)
+      {
+         newdata.push_back(*it);
+         newdata.push_back(" ");
+      }
+      state.make(words[1], newdata);
+
+   }
 }
 
 void fn_mkdir (inode_state& state, const wordvec& words){
@@ -105,10 +117,6 @@ void fn_mkdir (inode_state& state, const wordvec& words){
    {
       state.mkdir(words[1]);
    }
-   //inode newNode(file_type::DIRECTORY_TYPE);
-   //newNode.contents->dirents["."] = &newNode;
-
-   //state.getCWD(state);
 
 }
 

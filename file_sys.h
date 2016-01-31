@@ -49,6 +49,7 @@ class inode_state {
       void setPrompt(string newPrompt);
       inode_ptr getCWD(inode_state state);
       void mkdir(const string& path);
+      void make(const string& path, const wordvec& newdata);
 };
 
 // class inode -
@@ -79,6 +80,7 @@ class inode {
       file_type getContentType(){return contentType;}
       void mkDir(const string& folderName);
       size_t getContentSize();
+      void mkFile(const string& fileName, const wordvec& newdata);
 
 };
 

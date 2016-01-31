@@ -107,8 +107,6 @@ const string& inode_state::prompt() { return prompt_; }
 
 void inode_state::setPrompt(string newPrompt)
 {
-	//string newPrompt_str;
-	//newPrompt_str = newPrompt[1];
 	prompt_ = newPrompt;
 
 }
@@ -126,6 +124,14 @@ void inode_state::mkdir(const string& path)
 
 	targetFolder->mkDir(folderName);
 
+}
+
+void inode_state::make(const string& path, const wordvec& newdata)
+{
+	inode_ptr targetFolder = cwd;
+	string fileName= path;
+
+	targetFolder->mkFile(fileName, newdata);
 }
 
 /*======================================================================================================================
@@ -198,6 +204,17 @@ void inode::mkDir(const string& folderName) {
 		newNode->contents->setSelfNode(newNode);
 	}
 }
+
+void inode::mkFile(const string& fileName, const wordvec& newdata)
+{
+	inode_ptr newFile = this->contents->mkfile(fileName);
+	//if(newFile->contents->readfile().size() != 0)
+	{
+		newFile->contents->writefile(newdata);
+
+	}
+
+}
 
 /*======================================================================================================================
  *
@@ -227,6 +244,7 @@ const wordvec& plain_file::readfile() const {
 
 void plain_file::writefile (const wordvec& words) {
    DEBUGF ('i', words);
+	this->data = words;
 }
 
 void plain_file::remove (const string&) {
@@ -308,7 +326,7 @@ inode_ptr directory::mkdir (const string& dirname) {
 
 	bool is_dir_already_present = false;
 
-	// check if dirname alrady exists
+	// check if dirname already exists
 	is_dir_already_present = dirents.find(dirname) != dirents.end() ? true : false;
 
 	if(is_dir_already_present)
@@ -325,7 +343,23 @@ inode_ptr directory::mkdir (const string& dirname) {
 
 inode_ptr directory::mkfile (const string& filename) {
    DEBUGF ('i', filename);
-   return nullptr;
+
+	bool is_file_already_present = false;
+
+	// check if filename already exists
+	is_file_already_present = dirents.find(filename) != dirents.end() ? true : false;
+
+	if(is_file_already_present)
+	{
+		//inode_ptr existingFile = dirents[filename];
+		//existingFile->contents
+		return dirents[filename];
+	}
+
+	inode_ptr newFile = make_shared<inode>(file_type::PLAIN_TYPE);
+	dirents[filename] = newFile;
+
+   return newFile;
 }
 
 string directory::getNameOfNode(inode_ptr node) {

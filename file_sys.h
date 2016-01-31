@@ -50,6 +50,8 @@ class inode_state {
       inode_ptr getCWD(inode_state state);
       void mkdir(const string& path);
       void make(const string& path, const wordvec& newdata);
+      void cat(const string& path);
+      void rm(const string& path);
 };
 
 // class inode -
@@ -81,6 +83,8 @@ class inode {
       void mkDir(const string& folderName);
       size_t getContentSize();
       void mkFile(const string& fileName, const wordvec& newdata);
+      void catenate(const string& path);
+      void remove(const string& path);
 
 };
 
@@ -115,6 +119,8 @@ class base_file {
       virtual void getLS(const string& currentFolderName, vector<string>& result) = 0;
     virtual void setSelfNode(inode_ptr current) = 0;
     virtual void setParentNode(inode_ptr parent) = 0;
+    virtual inode_ptr fn_catenate(const string& fileName) = 0;
+    //virtual
 };
 
 
@@ -142,6 +148,7 @@ class plain_file: public base_file {
       virtual void getLS(const string& currentFolderName, vector<string>& result) override;
     virtual void setSelfNode(inode_ptr current) override;
     virtual void setParentNode(inode_ptr parent) override;
+    virtual inode_ptr fn_catenate(const string& fileName) override;
 
 };
 
@@ -184,6 +191,7 @@ class directory: public base_file {
       directory();
     virtual void setSelfNode(inode_ptr current) override;
     virtual void setParentNode(inode_ptr parent) override;
+    virtual inode_ptr fn_catenate(const string& fileName) override;
 
 };
 

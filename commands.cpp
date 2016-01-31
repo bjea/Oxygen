@@ -41,6 +41,15 @@ int exit_status_message() {
 void fn_cat (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+
+   string path = "";
+
+   if(words.size() > 1)
+   {
+      path = words[1];
+   }
+   DEBUGF ('c', path);
+   state.cat(path);
 }
 
 void fn_cd (inode_state& state, const wordvec& words){
@@ -148,6 +157,12 @@ void fn_pwd (inode_state& state, const wordvec& words){
 void fn_rm (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+
+   if (words.size() > 1)
+   {
+      state.rm(words[1]);
+   }
+
 }
 
 void fn_rmr (inode_state& state, const wordvec& words){

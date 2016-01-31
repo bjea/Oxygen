@@ -118,9 +118,9 @@ inode_ptr inode_state::getCWD(inode_state state)
 
 void inode_state::mkdir(const string& path)
 {
-	// process path: extract path and find correct node
+	// TODO: process path: extract path and find correct node
 	inode_ptr targetFolder = cwd;
-	string folderName= path;
+	string folderName = path;
 
 	targetFolder->mkDir(folderName);
 
@@ -128,10 +128,28 @@ void inode_state::mkdir(const string& path)
 
 void inode_state::make(const string& path, const wordvec& newdata)
 {
+	// TODO: process path: extract path and find correct node
 	inode_ptr targetFolder = cwd;
-	string fileName= path;
+	string fileName = path;
 
 	targetFolder->mkFile(fileName, newdata);
+}
+
+void inode_state::cat(const string& path)
+{
+	// TODO: process path: extract path and find correct node
+	inode_ptr targetFolder = cwd;
+	string fileName = path;
+
+	targetFolder->catenate(fileName);
+}
+
+void inode_state::rm(const string& path)
+{
+	// TODO: process path: extract path and find correct node
+	inode_ptr targetFolder = cwd;
+	string fileName = path;
+	targetFolder->remove(fileName);
 }
 
 /*======================================================================================================================
@@ -211,9 +229,24 @@ void inode::mkFile(const string& fileName, const wordvec& newdata)
 	//if(newFile->contents->readfile().size() != 0)
 	{
 		newFile->contents->writefile(newdata);
-
 	}
+}
 
+void inode::catenate(const string& fileName)
+{
+
+	inode_ptr targetFile = this->contents->fn_catenate(fileName);
+	wordvec data = targetFile->contents->readfile();
+	for (auto it = data.begin(); it != data.end(); ++it)
+	{
+		cout << *it;
+	}
+	cout << '\n';
+}
+
+void inode::remove(const string &path)
+{
+	this->contents->remove(path);
 }
 
 /*======================================================================================================================
@@ -278,7 +311,30 @@ void plain_file::getLS(const string&, vector<string>&) {
 
 void plain_file::setSelfNode(inode_ptr) {
 }
+
 void plain_file::setParentNode(inode_ptr) {
+
+}
+
+inode_ptr plain_file::fn_catenate(const string& fileName)
+{
+	/*bool is_file_already_present = false;
+	targetFolder->get
+
+	// check if filename already exists
+	// TODO: what if it's a folder name already, throw error!
+	is_file_already_present = dirents.find(filename) != dirents.end() ? true : false;
+
+	if (is_file_already_present)
+	{
+		inode_ptr existingFile = dirents[filename];
+		if (existingFile->getContentType() != file_type::PLAIN_TYPE)
+		{
+			throw file_error ("is a directory");
+		}
+
+		return existingFile;
+	}*/
 
 }
 
@@ -318,6 +374,30 @@ void directory::writefile (const wordvec&) {
 
 void directory::remove (const string& filename) {
    DEBUGF ('i', filename);
+
+	bool is_file_already_present = false;
+
+	// check if name already exists
+	is_file_already_present = dirents.find(filename) != dirents.end() ? true : false;
+
+	if (is_file_already_present)
+	{
+		inode_ptr existingFile = dirents[filename];
+		if (existingFile->getContentType() == file_type::DIRECTORY_TYPE)
+		{
+			size_t size_existingItem = existingFile->getContentSize();
+			if (size_existingItem > 2)
+			{
+				throw file_error ("is not an empty directory");
+			}
+		}
+		dirents.erase(filename);
+
+	}
+	else
+	{
+		throw file_error ("is not an existing file/directory");
+	}
 }
 
 
@@ -329,7 +409,7 @@ inode_ptr directory::mkdir (const string& dirname) {
 	// check if dirname already exists
 	is_dir_already_present = dirents.find(dirname) != dirents.end() ? true : false;
 
-	if(is_dir_already_present)
+	if (is_dir_already_present)
 	{
 		cout<< "TODO: throw error when mkdir for existing folder"<<endl;
 		return nullptr;
@@ -347,13 +427,18 @@ inode_ptr directory::mkfile (const string& filename) {
 	bool is_file_already_present = false;
 
 	// check if filename already exists
+	// TODO: what if it's a folder name already, throw error!
 	is_file_already_present = dirents.find(filename) != dirents.end() ? true : false;
 
-	if(is_file_already_present)
+	if (is_file_already_present)
 	{
-		//inode_ptr existingFile = dirents[filename];
-		//existingFile->contents
-		return dirents[filename];
+		inode_ptr existingFile = dirents[filename];
+		if (existingFile->getContentType() != file_type::PLAIN_TYPE)
+		{
+			throw file_error ("is a directory");
+		}
+
+		return existingFile;
 	}
 
 	inode_ptr newFile = make_shared<inode>(file_type::PLAIN_TYPE);
@@ -449,3 +534,28 @@ bool directory::shouldAppendSlash(const string& folderName, inode_ptr folderNode
 	return false;
 }
 
+inode_ptr directory::fn_catenate(const string& fileName)
+{
+	//throw file_error ("is a directory");
+	bool is_file_already_present = false;
+
+	// check if filename already exists
+	// TODO: what if it's a folder name already, throw error!
+	is_file_already_present = dirents.find(fileName) != dirents.end() ? true : false;
+
+	if (is_file_already_present)
+	{
+		inode_ptr existingFile = dirents[fileName];
+		if (existingFile->getContentType() != file_type::PLAIN_TYPE)
+		{
+			throw file_error ("is a directory");
+		}
+
+		return existingFile;
+	}
+	else
+	{
+		// Required Format: "cat: food: No such file or directory"
+		throw file_error ("cat: No such file or directory");
+	}
+}

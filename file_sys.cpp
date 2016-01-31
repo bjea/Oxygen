@@ -61,22 +61,27 @@ string inode_state::getPWD() {
 	return pathName;
 }
 
+// with given path, it will find the corresponding NODE containing FOLDER type contents ONLY
+// if client want to find a file inside a folder, this is how to use this function to get the parent folder of the file:
+// "/fd1/fd2/fl1" --> input to getTargetNode should be: "/fd/f2"
+// if path starts with "/", it will start searching from root.
+// otherwise, it will start the search from cwd.
+// empty path will return cwd immediately.
 inode_ptr inode_state::getTargetNode(const string& path) {
 
 	DEBUGF ('i', "path = " << path);
 	DEBUGF ('i', "path size = " << path.length());
+
 	inode_ptr targetNode = cwd;
 
 	// see if any path is specified
 	// if no path is specified, we should return cwd
 	if(path.length() > 0)
 	{
-		inode_ptr searchNode = cwd;
-
 		// if this is true, we have to search from root node
 		if(path[0] == '/')
 		{
-			searchNode = root;
+			targetNode = root;
 		}
 
 		// tokenize path by delimiter '/'
@@ -85,14 +90,18 @@ inode_ptr inode_state::getTargetNode(const string& path) {
 		for(unsigned int i = 0; i < pathTokens.size(); i++)
 		{
 			DEBUGF ('i', "path token = " << pathTokens[i]);
-		}
-		// find the right inode to do LS
-		// if token == ".", we will not change the current node
-		// if token == "..", we will move up 1 level, and do nothing when we reach to root node.
-		// else, find node with corresponding name, check if it contains file or folder, throw exception when the
-		// content type of a node is PLAIN_TYPE
 
+			string fdName = pathTokens[i];
+
+			inode_ptr nextNode = targetNode->contents->getNodeByName(fdName);
+
+			if(nextNode != nullptr)
+			{
+				targetNode = nextNode;
+			}
+		}
 	}
+
 	return targetNode;
 }
 
@@ -197,11 +206,6 @@ void inode::getLS(string path, vector<string>& result) {
 	if(path.empty())
 	{
 		currentFolder = "/";
-
-		if(contents->getNodeByName("..") != contents->getNodeByName("."))
-		{
-
-		}
 	}
 	else
 	{

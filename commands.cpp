@@ -67,6 +67,21 @@ void fn_echo (inode_state& state, const wordvec& words){
 void fn_exit (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+
+   int stateCode = 0;
+
+   if(words.size() > 1)
+   {
+      try {
+         stateCode = std::stoi(words[1]);
+      }
+      catch (const std::invalid_argument& ex)
+      {
+         stateCode = 127;
+      }
+   }
+
+   exit_status::set(stateCode);
    throw ysh_exit();
 }
 

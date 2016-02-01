@@ -29,7 +29,6 @@ ostream& operator<< (ostream& out, file_type type) {
  *
  =====================================================================================================================*/
 
-
 inode_state::inode_state() {
    // create root inode and set cwd == root
    root = make_shared<inode>(file_type::DIRECTORY_TYPE);
@@ -115,16 +114,13 @@ vector<string> inode_state::getLS(const string& path) {
 	return result;
 }
 
-
 const string& inode_state::prompt() { return prompt_; }
-
 
 void inode_state::setPrompt(string newPrompt)
 {
 	prompt_ = newPrompt;
 
 }
-
 
 void inode_state::mkdir(const string& path)
 {
@@ -152,7 +148,6 @@ void inode_state::mkdir(const string& path)
 
 }
 
-
 void inode_state::make(const string& path, const wordvec& newdata)
 {
 	// TODO: process path: extract path and find correct node
@@ -177,7 +172,6 @@ void inode_state::make(const string& path, const wordvec& newdata)
 
 	targetFolder->mkFile(fileName, newdata);
 }
-
 
 void inode_state::cat(const string& path)
 {
@@ -204,7 +198,6 @@ void inode_state::cat(const string& path)
 	targetFolder->catenate(fileName);
 }
 
-
 void inode_state::rm(const string& path)
 {
 	// TODO: process path: extract path and find correct node
@@ -230,29 +223,9 @@ void inode_state::rm(const string& path)
 	targetFolder->remove(fileName);
 }
 
-
 void inode_state::cd(const string& path)
 {
-	//size_t found = path.find("/");
 	cwd = getTargetNode(path);
-	/*;
-	string folderName = "";
-	if (found == string::npos)
-	{
-		targetFolder = cwd;
-		folderName = path;
-	}
-	else
-	{
-		size_t found2 = path.find_last_of("/");
-		string path_dirOnly = path.substr(0, found2);
-		folderName = path.substr(found2 + 1);
-		targetFolder = getTargetNode(path_dirOnly);
-	}*/
-
-	//inode_ptr destinationDir;
-	//destinationDir = targetFolder->changeDir(folderName);
-	//cwd = destinationDir;
 }
 
 /*======================================================================================================================
@@ -306,7 +279,6 @@ void inode::getLS(string path, vector<string>& result) {
 		currentFolder = path;
 	}
 
-
 	contents->getLS(currentFolder, result);
 }
 
@@ -342,15 +314,6 @@ void inode::catenate(const string& fileName)
 	}
 	cout << '\n';
 }
-
-/*
-inode_ptr inode::changeDir(const string& folderName)
-{
-	inode_ptr destinationDir;
-	destinationDir = this->contents->fn_changeDir(folderName);
-	return destinationDir;
-}*/
-
 
 void inode::remove(const string& fileName)
 {
@@ -424,32 +387,9 @@ void plain_file::setParentNode(inode_ptr) {
 
 }
 
-inode_ptr plain_file::fn_catenate(const string& fileName)
-{
-	/*bool is_file_already_present = false;
-	targetFolder->get
-
-	// check if filename already exists
-	// TODO: what if it's a folder name already, throw error!
-	is_file_already_present = dirents.find(filename) != dirents.end() ? true : false;
-
-	if (is_file_already_present)
-	{
-		inode_ptr existingFile = dirents[filename];
-		if (existingFile->getContentType() != file_type::PLAIN_TYPE)
-		{
-			throw file_error ("is a directory");
-		}
-
-		return existingFile;
-	}*/
-}
-
-/*
-inode_ptr plain_file::fn_changeDir(const string& folderName)
-{
+inode_ptr plain_file::fn_catenate(const string&) {
 	throw file_error ("is a plain file");
-}*/
+}
 
 /*======================================================================================================================
  *
@@ -618,15 +558,6 @@ void directory::getLS(const string& currentFolderName, vector<string>& result) {
 
 	 for (map<string,inode_ptr>::iterator it=dirents.begin(); it!=dirents.end(); ++it)
 	 {
-		 /*
-		 ls += SP;
-		 ls += std::to_string((it->second)->get_inode_nr());
-		 ls += SP;
-		 ls += std::to_string(this->size());
-		 ls += SP;
-		 ls += it->first;
-		  */
-
 		 constructLSInfo(it->first, SP, it->second, ls);
 	 }
 	 result.push_back(ls);
@@ -670,23 +601,3 @@ inode_ptr directory::fn_catenate(const string& fileName)
 		throw file_error ("cat: No such file or directory");
 	}
 }
-
-/*
-inode_ptr directory::fn_changeDir(const string& folderName)
-{
-	DEBUGF ('i', folderName);
-
-	bool is_dir_already_present = false;
-
-	// check if dirname already exists
-	is_dir_already_present = dirents.find(folderName) != dirents.end() ? true : false;
-
-	if (is_dir_already_present != true)
-	{
-		throw file_error (folderName+" does not exist");
-	}
-
-	return dirents[folderName];
-
-}
-*/

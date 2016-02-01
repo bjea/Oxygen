@@ -128,6 +128,22 @@ void fn_ls (inode_state& state, const wordvec& words){
 void fn_lsr (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+
+   string path = "";
+
+   if(words.size()>=2)
+   {
+      path = words[1];
+   }
+
+   DEBUGF ('c', path);
+
+   vector<string> lsInfo = state.getLSR(path);
+   for(unsigned int i = 0; i < lsInfo.size(); i++)
+   {
+      cout <<lsInfo[i]<<endl;
+   }
+
 }
 
 void fn_make (inode_state& state, const wordvec& words){

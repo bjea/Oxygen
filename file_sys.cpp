@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
+#include <queue>
 
 using namespace std;
 
@@ -111,6 +112,12 @@ inode_ptr inode_state::getTargetNode(const string& path) {
 vector<string> inode_state::getLS(const string& path) {
 	vector<string> result;
 	this->getTargetNode(path)->getLS(path, result);
+	return result;
+}
+
+vector<string> inode_state::getLSR(const string& path){
+	vector<string> result;
+	this->getTargetNode(path)->getLSR_inode(path, result);
 	return result;
 }
 
@@ -282,6 +289,23 @@ void inode::getLS(string path, vector<string>& result) {
 	contents->getLS(currentFolder, result);
 }
 
+void inode::getLSR_inode(string path, vector<string>& result)
+{
+	vector<string> lsInfo;
+	string currentFolder = "";
+
+	if(path.empty())
+	{
+		currentFolder = "/";
+	}
+	else
+	{
+		currentFolder = path;
+	}
+
+	contents->getLSR_dir(currentFolder, result);
+}
+
 void inode::mkDir(const string& folderName) {
 
 	inode_ptr newNode = this->contents->mkdir(folderName);
@@ -378,6 +402,11 @@ inode_ptr plain_file::getNodeByName(const string&) {
 void plain_file::getLS(const string&, vector<string>&) {
 	// it is a no-op for plain file
 	return;
+}
+
+void plain_file::getLSR_dir(const string &currentFolderName, vector<string> &result){
+	// it is a no-op for plain file
+	throw file_error ("is a plain file");
 }
 
 void plain_file::setSelfNode(inode_ptr) {
@@ -562,6 +591,44 @@ void directory::getLS(const string& currentFolderName, vector<string>& result) {
 	 }
 	 result.push_back(ls);
 }
+
+void directory::getLSR_dir(const string &currentFolderName, vector<string> &result){
+
+	static const string SP=" ";
+
+	string ls = "";
+	ls += currentFolderName;
+
+	inode_ptr me = selfNode.lock();
+	inode_ptr myParent = parentNode.lock();
+	constructLSInfo(".", SP, me, ls);
+	constructLSInfo("..", SP, myParent, ls);
+
+	queue<inode_ptr> dirQueue;
+	queue<string> dirNameQueue;
+	for (map<string,inode_ptr>::iterator it=dirents.begin(); it!=dirents.end(); ++it)
+	{
+		inode_ptr childNode = it->second;
+		constructLSInfo(it->first, SP, childNode, ls);
+		file_type fileType = childNode->getContentType();
+		if (fileType == file_type::DIRECTORY_TYPE)
+		{
+			dirQueue.push(childNode);
+			dirNameQueue.push(it->first);
+		}
+	}
+	result.push_back(ls);
+
+	while (dirQueue.size() != 0)
+	{
+		inode_ptr nextDir = dirQueue.front();
+		dirQueue.pop();
+		string nextDirName = dirNameQueue.front();
+		dirNameQueue.pop();
+		nextDir->getLSR_inode(nextDirName, result);
+	}
+}
+
 
 bool directory::shouldAppendSlash(const string& folderName, inode_ptr folderNode) {
 	if(folderName == "." or folderName == "..")

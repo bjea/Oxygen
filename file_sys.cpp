@@ -76,10 +76,10 @@ inode_ptr inode_state::getTargetNode(const string& path) {
 
 	// see if any path is specified
 	// if no path is specified, we should return cwd
-	if(path.length() > 0)
+	if (path.length() > 0)
 	{
 		// if this is true, we have to search from root node
-		if(path[0] == '/')
+		if (path[0] == '/')
 		{
 			targetNode = root;
 		}
@@ -87,7 +87,7 @@ inode_ptr inode_state::getTargetNode(const string& path) {
 		// tokenize path by delimiter '/'
 		wordvec pathTokens = split(path, "/");
 
-		for(unsigned int i = 0; i < pathTokens.size(); i++)
+		for (unsigned int i = 0; i < pathTokens.size(); ++i)
 		{
 			DEBUGF ('i', "path token = " << pathTokens[i]);
 
@@ -95,9 +95,13 @@ inode_ptr inode_state::getTargetNode(const string& path) {
 
 			inode_ptr nextNode = targetNode->contents->getNodeByName(fdName);
 
-			if(nextNode != nullptr)
+			if (nextNode != nullptr)
 			{
 				targetNode = nextNode;
+			}
+			else
+			{
+				throw file_error (path+" does not exist!");
 			}
 		}
 	}
@@ -114,51 +118,141 @@ vector<string> inode_state::getLS(const string& path) {
 
 const string& inode_state::prompt() { return prompt_; }
 
+
 void inode_state::setPrompt(string newPrompt)
 {
 	prompt_ = newPrompt;
 
 }
 
-inode_ptr inode_state::getCWD(inode_state state)
-{
-	return cwd;
-}
 
 void inode_state::mkdir(const string& path)
 {
 	// TODO: process path: extract path and find correct node
-	inode_ptr targetFolder = cwd;
-	string folderName = path;
+	//inode_ptr targetFolder = cwd;
+	//string folderName = path;
+
+	size_t found = path.find("/");
+	inode_ptr targetFolder;
+	string folderName = "";
+	if (found == string::npos)
+	{
+		targetFolder = cwd;
+		folderName = path;
+	}
+	else
+	{
+		size_t found2 = path.find_last_of("/");
+		string path_dirOnly = path.substr(0, found2);
+		folderName = path.substr(found2 + 1);
+		targetFolder = getTargetNode(path_dirOnly);
+	}
 
 	targetFolder->mkDir(folderName);
 
 }
 
+
 void inode_state::make(const string& path, const wordvec& newdata)
 {
 	// TODO: process path: extract path and find correct node
-	inode_ptr targetFolder = cwd;
-	string fileName = path;
+	//inode_ptr targetFolder = cwd;
+	//string fileName = path;
+
+	size_t found = path.find("/");
+	inode_ptr targetFolder;
+	string fileName = "";
+	if (found == string::npos)
+	{
+		targetFolder = cwd;
+		fileName = path;
+	}
+	else
+	{
+		size_t found2 = path.find_last_of("/");
+		string path_dirOnly = path.substr(0, found2);
+		fileName = path.substr(found2 + 1);
+		targetFolder = getTargetNode(path_dirOnly);
+	}
 
 	targetFolder->mkFile(fileName, newdata);
 }
 
+
 void inode_state::cat(const string& path)
 {
 	// TODO: process path: extract path and find correct node
-	inode_ptr targetFolder = cwd;
-	string fileName = path;
+	//inode_ptr targetFolder = cwd;
+	//string fileName = path;
+
+	size_t found = path.find("/");
+	inode_ptr targetFolder;
+	string fileName = "";
+	if (found == string::npos)
+	{
+		targetFolder = cwd;
+		fileName = path;
+	}
+	else
+	{
+		size_t found2 = path.find_last_of("/");
+		string path_dirOnly = path.substr(0, found2);
+		fileName = path.substr(found2 + 1);
+		targetFolder = getTargetNode(path_dirOnly);
+	}
 
 	targetFolder->catenate(fileName);
 }
 
+
 void inode_state::rm(const string& path)
 {
 	// TODO: process path: extract path and find correct node
-	inode_ptr targetFolder = cwd;
-	string fileName = path;
+	//inode_ptr targetFolder = cwd;
+	//string fileName = path;
+
+	size_t found = path.find("/");
+	inode_ptr targetFolder;
+	string fileName = "";
+	if (found == string::npos)
+	{
+		targetFolder = cwd;
+		fileName = path;
+	}
+	else
+	{
+		size_t found2 = path.find_last_of("/");
+		string path_dirOnly = path.substr(0, found2);
+		fileName = path.substr(found2 + 1);
+		targetFolder = getTargetNode(path_dirOnly);
+	}
+
 	targetFolder->remove(fileName);
+}
+
+
+void inode_state::cd(const string& path)
+{
+	//size_t found = path.find("/");
+	cwd = getTargetNode(path);
+	/*;
+	string folderName = "";
+	if (found == string::npos)
+	{
+		targetFolder = cwd;
+		folderName = path;
+	}
+	else
+	{
+		size_t found2 = path.find_last_of("/");
+		string path_dirOnly = path.substr(0, found2);
+		folderName = path.substr(found2 + 1);
+		targetFolder = getTargetNode(path_dirOnly);
+	}*/
+
+	//inode_ptr destinationDir;
+	//destinationDir = targetFolder->changeDir(folderName);
+	//cwd = destinationDir;
 }
 
 /*======================================================================================================================
@@ -236,6 +330,7 @@ void inode::mkFile(const string& fileName, const wordvec& newdata)
 	}
 }
 
+
 void inode::catenate(const string& fileName)
 {
 
@@ -248,9 +343,18 @@ void inode::catenate(const string& fileName)
 	cout << '\n';
 }
 
-void inode::remove(const string &path)
+/*
+inode_ptr inode::changeDir(const string& folderName)
 {
-	this->contents->remove(path);
+	inode_ptr destinationDir;
+	destinationDir = this->contents->fn_changeDir(folderName);
+	return destinationDir;
+}*/
+
+
+void inode::remove(const string& fileName)
+{
+	this->contents->remove(fileName);
 }
 
 /*======================================================================================================================
@@ -339,8 +443,13 @@ inode_ptr plain_file::fn_catenate(const string& fileName)
 
 		return existingFile;
 	}*/
-
 }
+
+/*
+inode_ptr plain_file::fn_changeDir(const string& folderName)
+{
+	throw file_error ("is a plain file");
+}*/
 
 /*======================================================================================================================
  *
@@ -415,8 +524,7 @@ inode_ptr directory::mkdir (const string& dirname) {
 
 	if (is_dir_already_present)
 	{
-		cout<< "TODO: throw error when mkdir for existing folder"<<endl;
-		return nullptr;
+		throw file_error (dirname+" already exists");
 	}
 
 	inode_ptr newNode = make_shared<inode>(file_type::DIRECTORY_TYPE);
@@ -540,7 +648,6 @@ bool directory::shouldAppendSlash(const string& folderName, inode_ptr folderNode
 
 inode_ptr directory::fn_catenate(const string& fileName)
 {
-	//throw file_error ("is a directory");
 	bool is_file_already_present = false;
 
 	// check if filename already exists
@@ -563,3 +670,23 @@ inode_ptr directory::fn_catenate(const string& fileName)
 		throw file_error ("cat: No such file or directory");
 	}
 }
+
+/*
+inode_ptr directory::fn_changeDir(const string& folderName)
+{
+	DEBUGF ('i', folderName);
+
+	bool is_dir_already_present = false;
+
+	// check if dirname already exists
+	is_dir_already_present = dirents.find(folderName) != dirents.end() ? true : false;
+
+	if (is_dir_already_present != true)
+	{
+		throw file_error (folderName+" does not exist");
+	}
+
+	return dirents[folderName];
+
+}
+*/

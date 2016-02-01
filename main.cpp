@@ -75,6 +75,10 @@ int main (int argc, char** argv) {
             // exn is thrown and printed here.
             complain() << error.what() << endl;
          }
+         catch (file_error& error)
+         {
+            complain() << error.what() <<endl;
+         }
       }
    } catch (ysh_exit&) {
       // This catch intentionally left blank.

@@ -44,7 +44,7 @@ void fn_cat (inode_state& state, const wordvec& words){
 
    string path = "";
 
-   if(words.size() > 1)
+   if (words.size() > 1)
    {
       path = words[1];
    }
@@ -55,6 +55,25 @@ void fn_cat (inode_state& state, const wordvec& words){
 void fn_cd (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+
+   string path = "";
+
+   if (words.size() == 1)
+   {
+      path = "/";
+   }
+   else if (words.size() > 2)
+   {
+      cout << "Too many operands! Please give just 1 folderName or 1 pathName." << endl;
+      return;
+   }
+   else
+   {
+      path = words[1];
+   }
+
+   DEBUGF ('c', path);
+   state.cd(path);
 }
 
 void fn_echo (inode_state& state, const wordvec& words){

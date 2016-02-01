@@ -441,7 +441,7 @@ void directory::remove (const string& filename) {
 			size_t size_existingItem = existingFile->getContentSize();
 			if (size_existingItem > 2)
 			{
-				throw file_error ("is not an empty directory");
+				throw file_error (filename+" is not an empty directory");
 			}
 		}
 		dirents.erase(filename);
@@ -449,7 +449,7 @@ void directory::remove (const string& filename) {
 	}
 	else
 	{
-		throw file_error ("is not an existing file/directory");
+		throw file_error (filename+" is not a valid file/directory");
 	}
 }
 

@@ -52,8 +52,8 @@ class inode_state {
       void make(const string& path, const wordvec& newdata);
       void cat(const string& path);
       void rm(const string& path);
+      void rmr(const string& path);
       void cd(const string& path);
-
 };
 
 // class inode -
@@ -88,6 +88,7 @@ class inode {
       void mkFile(const string& fileName, const wordvec& newdata);
       void catenate(const string& fileName);
       void remove(const string& fileName);
+      void rmr_inode(const string& fileName);
       inode_ptr changeDir(const string& folderName);
 
 };
@@ -116,15 +117,16 @@ class base_file {
       virtual const wordvec& readfile() const = 0;
       virtual void writefile (const wordvec& newdata) = 0;
       virtual void remove (const string& filename) = 0;
+      virtual void rmr_dir (const string& filename) = 0;
       virtual inode_ptr mkdir (const string& dirname) = 0;
       virtual inode_ptr mkfile (const string& filename) = 0;
       virtual string getNameOfNode(inode_ptr node) = 0;
       virtual inode_ptr getNodeByName(const string& nodeName) = 0;
       virtual void getLS(const string& currentFolderName, vector<string>& result) = 0;
       virtual void getLSR_dir(const string& currentFolderName, vector<string>& result) = 0;
-    virtual void setSelfNode(inode_ptr current) = 0;
-    virtual void setParentNode(inode_ptr parent) = 0;
-    virtual inode_ptr fn_catenate(const string& fileName) = 0;
+      virtual void setSelfNode(inode_ptr current) = 0;
+      virtual void setParentNode(inode_ptr parent) = 0;
+      virtual inode_ptr fn_catenate(const string& fileName) = 0;
 };
 
 
@@ -145,15 +147,16 @@ class plain_file: public base_file {
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;
+    virtual void rmr_dir (const string& filename) override;
       virtual inode_ptr mkdir (const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
       virtual string getNameOfNode(inode_ptr node) override;
       virtual inode_ptr getNodeByName(const string& nodeName) override;
       virtual void getLS(const string& currentFolderName, vector<string>& result) override;
-    virtual void getLSR_dir(const string& currentFolderName, vector<string>& result) override;
-    virtual void setSelfNode(inode_ptr current) override;
-    virtual void setParentNode(inode_ptr parent) override;
-    virtual inode_ptr fn_catenate(const string& fileName) override;
+      virtual void getLSR_dir(const string& currentFolderName, vector<string>& result) override;
+      virtual void setSelfNode(inode_ptr current) override;
+      virtual void setParentNode(inode_ptr parent) override;
+      virtual inode_ptr fn_catenate(const string& fileName) override;
 };
 
 // class directory -
@@ -176,7 +179,7 @@ class plain_file: public base_file {
 
 class directory: public base_file {
    private:
-      // Must be a map, not unordered_map, so printing is lexicographic
+      // Must be a map, not unordered_map, so printing is lexicographic.
       map<string,inode_ptr> dirents;
       wk_inode_ptr parentNode;
       wk_inode_ptr selfNode;
@@ -187,16 +190,17 @@ class directory: public base_file {
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;
+      virtual void rmr_dir (const string& filename) override;
       virtual inode_ptr mkdir (const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
       virtual string getNameOfNode(inode_ptr node) override;
       virtual inode_ptr getNodeByName(const string& nodeName) override;
       virtual void getLS(const string& currentFolderName, vector<string>& result) override;
-    virtual void getLSR_dir(const string& currentFolderName, vector<string>& result) override;
-    directory();
-    virtual void setSelfNode(inode_ptr current) override;
-    virtual void setParentNode(inode_ptr parent) override;
-    virtual inode_ptr fn_catenate(const string& fileName) override;
+      virtual void getLSR_dir(const string& currentFolderName, vector<string>& result) override;
+      directory();
+      virtual void setSelfNode(inode_ptr current) override;
+      virtual void setParentNode(inode_ptr parent) override;
+      virtual inode_ptr fn_catenate(const string& fileName) override;
 };
 
 #endif

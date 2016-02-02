@@ -609,11 +609,12 @@ void directory::getLS(const string& currentFolderName, vector<string>& result) {
 	 static const string SP = " ";
 
 	 string ls = "";
-	 ls += currentFolderName;
-	 ls += "\t";
 
-	 inode_ptr me = selfNode.lock();
-	 inode_ptr myParent = parentNode.lock();
+	ls += currentFolderName;
+	ls += "\t";
+
+	inode_ptr me = selfNode.lock();
+	inode_ptr myParent = parentNode.lock();
 	constructLSInfo(".", SP, me, ls);
 	constructLSInfo("..", SP, myParent, ls);
 
